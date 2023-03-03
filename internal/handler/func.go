@@ -12,3 +12,11 @@ func WrapF(f Func) gin.HandlerFunc {
 		f(context.New(c))
 	}
 }
+
+func WrapChain(fns ...Func) gin.HandlersChain {
+	chain := gin.HandlersChain{}
+	for _, f := range fns {
+		chain = append(chain, WrapF(f))
+	}
+	return chain
+}

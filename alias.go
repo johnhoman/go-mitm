@@ -34,11 +34,7 @@ type Engine struct {
 }
 
 func (e *Engine) Handle(method string, relativePath string, handlers ...HandlerFunc) {
-	chain := gin.HandlersChain{}
-	for _, f := range handlers {
-		chain = append(chain, handler.WrapF(f))
-	}
-	e.Engine.Handle(method, relativePath, chain...)
+	e.Engine.Handle(method, relativePath, handler.WrapChain(handlers...)...)
 }
 
 func (e *Engine) POST(relativePath string, handlers ...HandlerFunc) {
@@ -55,6 +51,14 @@ func (e *Engine) DELETE(relativePath string, handlers ...HandlerFunc) {
 
 func (e *Engine) PATCH(relativePath string, handlers ...HandlerFunc) {
 	e.Handle(http.MethodPatch, relativePath, handlers...)
+}
+
+func (e *Engine) Use(handlers ...HandlerFunc) {
+	e.Engine.Use(handler.WrapChain(handlers...)...)
+}
+
+func (e *Engine) NoRoute(handlers ...HandlerFunc) {
+	e.Engine.NoRoute(handler.WrapChain(handlers...)...)
 }
 
 var (
