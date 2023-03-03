@@ -1,4 +1,4 @@
-module github.com/johnhoman/mitm
+module github.com/johnhoman/go-mitm
 
 go 1.20
 
