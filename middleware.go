@@ -10,13 +10,6 @@ import (
 	"github.com/johnhoman/go-mitm/internal/transformer"
 )
 
-const (
-	ContextKeyUsername            = "ContextKeyUsername"
-	ContextKeyUsernameTransformed = "ContextKeyUsername-Transformed"
-
-	ErrMiddlewareRequireUsernameHeader = "Missing required prerequisite middleware RequiredUsernameHeader"
-)
-
 func RequireHeader(key string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.GetHeader(key) == "" {
@@ -32,15 +25,15 @@ func RequireUsernameHeader(key string) gin.HandlerFunc {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
-		c.Set(ContextKeyUsername, c.GetHeader(key))
+		c.Set(internal.ContextKeyUsername, c.GetHeader(key))
 	}
 }
 
 func TransformUsername(f ...transformer.String) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		s := c.GetString(ContextKeyUsername)
+		s := c.GetString(internal.ContextKeyUsername)
 		chain := transformer.StringChain(f)
-		c.Set(ContextKeyUsernameTransformed, chain.Transform(c, s))
+		c.Set(internal.ContextKeyUsernameTransformed, chain.Transform(c, s))
 	}
 }
 
