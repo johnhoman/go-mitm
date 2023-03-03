@@ -1,22 +1,22 @@
 package transformer
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/johnhoman/go-mitm/internal/context"
 )
 
 type Body interface {
-	Transform(c *gin.Context, body any)
+	Transform(c *context.Context, body any)
 }
 
-type BodyFunc func(c *gin.Context, body any)
+type BodyFunc func(c *context.Context, body any)
 
-func (f BodyFunc) Transform(c *gin.Context, body any) {
+func (f BodyFunc) Transform(c *context.Context, body any) {
 	f(c, body)
 }
 
 type BodyChain []Body
 
-func (ch BodyChain) Transform(c *gin.Context, body any) {
+func (ch BodyChain) Transform(c *context.Context, body any) {
 	for _, f := range ch {
 		f.Transform(c, body)
 		if c.IsAborted() {

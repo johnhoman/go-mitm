@@ -1,7 +1,7 @@
 package mitm
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/johnhoman/go-mitm/internal/context"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -11,14 +11,11 @@ import (
 )
 
 const (
-	ContextKeyUsername            = "ContextKeyUsername"
-	ContextKeyUsernameTransformed = "ContextKeyUsername-Transformed"
-
 	ErrMiddlewareRequireUsernameHeader = "Missing required prerequisite middleware RequiredUsernameHeader"
 )
 
-func RequireHeader(key string) gin.HandlerFunc {
-	return func(c *gin.Context) {
+func RequireHeader(key string) HandlerFunc {
+	return func(c *Context) {
 		if c.GetHeader(key) == "" {
 			c.AbortWithStatus(http.StatusBadRequest)
 			return
@@ -26,32 +23,32 @@ func RequireHeader(key string) gin.HandlerFunc {
 	}
 }
 
-func RequireUsernameHeader(key string) gin.HandlerFunc {
-	return func(c *gin.Context) {
+func RequireUsernameHeader(key string) HandlerFunc {
+	return func(c *Context) {
 		if c.GetHeader(key) == "" {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
-		c.Set(ContextKeyUsername, c.GetHeader(key))
+		c.Set(context.ContextKeyUsername, c.GetHeader(key))
 	}
 }
 
-func TransformUsername(f ...transformer.String) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		s := c.GetString(ContextKeyUsername)
+func TransformUsername(f ...transformer.String) HandlerFunc {
+	return func(c *Context) {
+		s := c.GetString(context.ContextKeyUsername)
 		chain := transformer.StringChain(f)
-		c.Set(ContextKeyUsernameTransformed, chain.Transform(c, s))
+		c.Set(context.ContextKeyUsernameTransformed, chain.Transform(c, s))
 	}
 }
 
-func ProxyAfter(upstream *url.URL, transport http.RoundTripper) gin.HandlerFunc {
+func ProxyAfter(upstream *url.URL, transport http.RoundTripper) HandlerFunc {
 	if upstream == nil {
 		panic("argument upstream cannot be nil")
 	}
 	if transport == nil {
 		transport = http.DefaultTransport
 	}
-	return func(c *gin.Context) {
+	return func(c *Context) {
 		c.Next()
 		if c.IsAborted() || c.Writer.Written() {
 			return
@@ -102,7 +99,7 @@ func WithDirector(d Director) ProxyOption {
 	}
 }
 
-func ProxyTo(upstream *url.URL, opts ...ProxyOption) gin.HandlerFunc {
+func ProxyTo(upstream *url.URL, opts ...ProxyOption) HandlerFunc {
 	o := &proxyOptions{}
 	for _, f := range opts {
 		f(o)
@@ -116,5 +113,5 @@ func ProxyTo(upstream *url.URL, opts ...ProxyOption) gin.HandlerFunc {
 	if o.transport != nil {
 		proxy.Transport = o.transport
 	}
-	return gin.WrapH(proxy)
+	return WrapH(proxy)
 }

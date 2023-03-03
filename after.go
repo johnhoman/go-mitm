@@ -3,11 +3,12 @@ package mitm
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/johnhoman/go-mitm/internal/context"
+	"github.com/johnhoman/go-mitm/internal/handler"
 	"io"
 	"net/http"
 	"reflect"
 
-	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 
 	"github.com/johnhoman/go-mitm/internal"
@@ -18,7 +19,7 @@ const (
 	ErrAbortAfterResponse = "the request was aborted after the response from the upstream server"
 )
 
-func AfterResponse(into func() any, opts ...any) gin.HandlerFunc {
+func AfterResponse(into func() any, opts ...any) handler.Func {
 	var (
 		bodyChain   transformer.BodyChain
 		headerChain transformer.HeaderChain
@@ -40,7 +41,7 @@ func AfterResponse(into func() any, opts ...any) gin.HandlerFunc {
 	if v == nil || reflect.ValueOf(v).Kind() != reflect.Pointer {
 		panic("argument into() must return a non nil pointer")
 	}
-	return func(c *gin.Context) {
+	return func(c *context.Context) {
 		c.Set(internal.AfterResponseFuncKey, internal.AfterResponseFunc(func(req *http.Response) error {
 			if req.Body != nil && len(bodyChain) > 0 {
 				m := into()
