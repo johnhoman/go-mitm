@@ -3,17 +3,17 @@ package mitm
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/johnhoman/go-mitm/internal/handler"
 	"io"
 	"net/http"
 	"reflect"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 
 	"github.com/johnhoman/go-mitm/internal/transformer"
 )
 
-func BeforeRequest(into func() any, opts ...any) handler.Func {
+func BeforeRequest(into func() any, opts ...any) gin.HandlerFunc {
 	var (
 		bodyChain   transformer.BodyChain
 		headerChain transformer.HeaderChain
@@ -35,7 +35,7 @@ func BeforeRequest(into func() any, opts ...any) handler.Func {
 	if v == nil || reflect.ValueOf(v).Kind() != reflect.Pointer {
 		panic("argument into() must return a non nil pointer")
 	}
-	return func(c *Context) {
+	return func(c *gin.Context) {
 		if c.Request.Body != nil && len(bodyChain) > 0 {
 			m := into()
 			if err := c.MustBindWith(m, binding.JSON); err != nil {
