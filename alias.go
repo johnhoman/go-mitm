@@ -1,7 +1,7 @@
 package mitm
 
 import (
-	"github.com/johnhoman/mitm/internal/transformer"
+	"github.com/johnhoman/go-mitm/internal/transformer"
 )
 
 type (

@@ -2,11 +2,12 @@ package mitm
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/johnhoman/mitm/internal"
-	"github.com/johnhoman/mitm/internal/transformer"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+
+	"github.com/johnhoman/go-mitm/internal"
+	"github.com/johnhoman/go-mitm/internal/transformer"
 )
 
 const (

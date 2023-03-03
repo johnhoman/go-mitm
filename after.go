@@ -10,8 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 
-	"github.com/johnhoman/mitm/internal"
-	"github.com/johnhoman/mitm/internal/transformer"
+	"github.com/johnhoman/go-mitm/internal"
+	"github.com/johnhoman/go-mitm/internal/transformer"
 )
 
 const (

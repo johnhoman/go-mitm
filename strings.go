@@ -3,7 +3,7 @@ package mitm
 import (
 	"encoding/hex"
 	"github.com/gin-gonic/gin"
-	"github.com/johnhoman/mitm/internal/transformer"
+	"github.com/johnhoman/go-mitm/internal/transformer"
 	"regexp"
 	"strings"
 )

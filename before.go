@@ -3,12 +3,14 @@ package mitm
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/johnhoman/mitm/internal/transformer"
 	"io"
 	"net/http"
 	"reflect"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+
+	"github.com/johnhoman/go-mitm/internal/transformer"
 )
 
 func BeforeRequest(into func() any, opts ...any) gin.HandlerFunc {
