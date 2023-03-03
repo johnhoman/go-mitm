@@ -41,11 +41,11 @@ func AfterResponse(into func() any, opts ...any) gin.HandlerFunc {
 		panic("argument into() must return a non nil pointer")
 	}
 	return func(c *gin.Context) {
-		c.Set(internal.AfterResponseFuncKey, internal.AfterResponseFunc(func(req *http.Response) error {
-			if req.Body != nil && len(bodyChain) > 0 {
+		c.Set(internal.AfterResponseFuncKey, internal.AfterResponseFunc(func(res *http.Response) error {
+			if res.Body != nil && len(bodyChain) > 0 {
 				m := into()
-				if err := json.NewDecoder(req.Body).Decode(m); err != nil {
-					_ = req.Body.Close()
+				if err := json.NewDecoder(res.Body).Decode(m); err != nil {
+					_ = res.Body.Close()
 					return err
 				}
 				bodyChain.Transform(c, m)
@@ -56,14 +56,11 @@ func AfterResponse(into func() any, opts ...any) gin.HandlerFunc {
 				if err := json.NewEncoder(buf).Encode(m); err != nil {
 					return err
 				}
-				c.Request.Body = io.NopCloser(buf)
-				c.Request.ContentLength = int64(buf.Len())
+				res.Body = io.NopCloser(buf)
+				res.ContentLength = int64(buf.Len())
 				headerChain = append(headerChain, ResetContentLength(buf.Len()))
 			}
-			q := c.Request.URL.Query()
-			queryChain.Transform(c, q)
-			c.Request.URL.RawQuery = q.Encode()
-			headerChain.Transform(c, c.Request.Header)
+			headerChain.Transform(c, res.Header)
 			return nil
 		}))
 	}
