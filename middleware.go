@@ -66,3 +66,55 @@ func ProxyAfter(upstream *url.URL, transport http.RoundTripper) gin.HandlerFunc 
 		proxy.ServeHTTP(c.Writer, c.Request)
 	}
 }
+
+type RoundTripFunc func(req *http.Request) (*http.Response, error)
+
+func (f RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+	return f(req)
+}
+
+type Director interface {
+	ModifyRequest(req *http.Request)
+}
+
+type DirectorFunc func(req *http.Request)
+
+func (f DirectorFunc) ModifyRequest(req *http.Request) {
+	f(req)
+}
+
+type proxyOptions struct {
+	transport http.RoundTripper
+	director  Director
+}
+
+type ProxyOption func(o *proxyOptions)
+
+func WithTransport(t http.RoundTripper) ProxyOption {
+	return func(o *proxyOptions) {
+		o.transport = t
+	}
+}
+
+func WithDirector(d Director) ProxyOption {
+	return func(o *proxyOptions) {
+		o.director = d
+	}
+}
+
+func ProxyTo(upstream *url.URL, opts ...ProxyOption) gin.HandlerFunc {
+	o := &proxyOptions{}
+	for _, f := range opts {
+		f(o)
+	}
+	proxy := httputil.NewSingleHostReverseProxy(upstream)
+	if o.director != nil {
+		proxy.Director = func(req *http.Request) {
+			o.director.ModifyRequest(req)
+		}
+	}
+	if o.transport != nil {
+		proxy.Transport = o.transport
+	}
+	return gin.WrapH(proxy)
+}
